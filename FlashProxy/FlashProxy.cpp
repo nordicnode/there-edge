@@ -582,7 +582,7 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::QueryHitPoint(DWORD dwAspect, LPCREC
 
     for (LONG i = 0; i < m_maskRectCount; ++i)
     {
-        RECT maskRect = m_maskRects[m_maskRectCount];
+        RECT maskRect = m_maskRects[i];
         if (point.x >= maskRect.left && point.y >= maskRect.top && point.x < maskRect.right && point.y < maskRect.bottom)
         {
             *pHitResult = HITRESULT_TRANSPARENT;
