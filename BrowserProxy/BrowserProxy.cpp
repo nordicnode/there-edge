@@ -37,6 +37,9 @@ void Log(const WCHAR *format, ...)
     _vsnwprintf_s(buff, _countof(buff), format, args);
 
     FILE *file = nullptr;
+    // ponytail: relative path resolves against the host process CWD, not the DLL's directory.
+    // Debug-only (THERE_LOGGING off by default); if logging is turned on for real, derive the
+    // path from GetModuleFileName(g_Instance, ...) so Debug.log lands beside the proxy DLL.
     if (file = _fsopen("Debug.log", "a", _SH_DENYWR))
     {
         vfwprintf_s(file, format, args);
