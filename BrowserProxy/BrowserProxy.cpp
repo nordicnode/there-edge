@@ -1373,7 +1373,10 @@ HRESULT BrowserProxyModule::Navigate()
 
     if (FAILED(m_view->Navigate(m_url)))
     {
-        if (wcsncmp(m_url, L"http://", 7) == 0 || wcsncmp(m_url, L"https://", 8) == 0)
+        // Only retry bare-host URLs (no scheme) by wrapping them in http://. A URL with any
+        // scheme already present (http, https, or anything else like edge://) is left as-is so
+        // we never smash an unknown scheme into 'http://edge://...' on a transient navigate failure.
+        if (wcsstr(m_url, L"://") != nullptr)
             return E_FAIL;
 
         CComBSTR burl = L"http://";
