@@ -228,6 +228,11 @@ public:
     static LRESULT APIENTRY ChildWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 protected:
+    // ponytail: refcount is plain ++/--, not interlocked. Safe today because _ATL_APARTMENT_THREADED
+    // keeps these objects single-threaded and There never marshals the Flash/WebBrowser control
+    // across apartments. Upgrade to InterlockedIncrement/InterlockedDecrement in every proxy class
+    // (BrowserProxyModule, FlashProxyModule, SettingsRequestHandler, VoiceTrainerProxy,
+    // FlashRequestProxy) if the control is ever exposed cross-apartment.
     ULONG                                    m_refCount;
     QACONTAINER                              m_qaContainer;
     QACONTROL                                m_qaControl;
