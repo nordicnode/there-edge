@@ -5,6 +5,17 @@ using namespace Microsoft::WRL;
 
 void Log(const WCHAR *format, ...);
 
+// ponytail: private internal interface, not in the IDL/typelib — exists only so a parent
+// BrowserProxyModule can hand the new-window deferral to a child instance it created via
+// CreateInstance, without a dynamic_cast across a COM interface pointer (which needs RTTI
+// and shares a C++ class identity that a separate COM instance has no obligation to provide).
+_declspec(uuid("9F8A4D21-7C30-4E2A-9B61-5E6D1A7F0C14"))
+class IThereEdgeDeferralTarget: public IUnknown
+{
+public:
+    virtual HRESULT STDMETHODCALLTYPE SetDeferral(ICoreWebView2NewWindowRequestedEventArgs *args) = 0;
+};
+
 class BrowserProxyModule: public ATL::CAtlDllModuleT<BrowserProxyModule>,
                           public IClassFactoryEx,
                           public IConnectionPointContainer,
@@ -15,6 +26,7 @@ class BrowserProxyModule: public ATL::CAtlDllModuleT<BrowserProxyModule>,
                           public IViewObjectEx,
                           public ISupportErrorInfo,
                           public IThereEdgeWebBrowser2,
+                          public IThereEdgeDeferralTarget,
                           public ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler,
                           public ICoreWebView2CreateCoreWebView2ControllerCompletedHandler
 {

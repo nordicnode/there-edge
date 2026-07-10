@@ -249,6 +249,13 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::QueryInterface(REFIID riid, void *
         return S_OK;
     }
 
+    if (IsEqualIID(riid, __uuidof(IThereEdgeDeferralTarget)))
+    {
+        AddRef();
+        *object = static_cast<IThereEdgeDeferralTarget*>(this);
+        return S_OK;
+    }
+
     *object = nullptr;
     return E_NOINTERFACE;
 }
@@ -1007,18 +1014,14 @@ HRESULT BrowserProxyModule::OnNewWindowRequested(ICoreWebView2 *sender, ICoreWeb
 
     if (vdispatch != nullptr)
     {
-        CComPtr<IThereEdgeWebBrowser2> browser;
-        vdispatch->QueryInterface(&browser);
+        CComPtr<IThereEdgeDeferralTarget> target;
+        HRESULT qhr = vdispatch->QueryInterface(__uuidof(IThereEdgeDeferralTarget), (void**)&target);
         vdispatch->Release();
 
-        if (browser == nullptr)
+        if (FAILED(qhr) || target == nullptr)
             return E_FAIL;
 
-        BrowserProxyModule *module = dynamic_cast<BrowserProxyModule*>(browser.p);
-        if (module == nullptr)
-            return E_FAIL;
-
-        if (FAILED(module->SetDeferral(args)))
+        if (FAILED(target->SetDeferral(args)))
             return E_FAIL;
     }
 
