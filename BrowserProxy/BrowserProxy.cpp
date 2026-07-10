@@ -1460,20 +1460,38 @@ HRESULT BrowserProxyModule::SetVisibility(BOOL visible)
 HRESULT BrowserProxyModule::ForwardCookie(ICoreWebView2CookieManager *cookieManager, const WCHAR *url,
                                           const WCHAR *name, const WCHAR *domain, const WCHAR *path)
 {
+    // InternetGetCookie ignores the per-cookie name hint on most Windows versions and returns
+    // every cookie for the URL as "name1=value1; name2=value2; ...". Tokenize to find the
+    // requested name's value rather than assuming the buffer starts with "name=".
     WCHAR buff[1000];
-    DWORD size;
+    DWORD size = _countof(buff);
 
-    size = _countof(buff);
-    if (!InternetGetCookie(url, name, buff, &size))
+    if (!InternetGetCookie(url, nullptr, buff, &size))
         return E_FAIL;
 
     const WCHAR *value = nullptr;
     {
-        DWORD skip = (DWORD)wcslen(name) + 1; // name=
-        if (size < skip)
-            return E_FAIL;
+        const size_t nameLen = wcslen(name);
+        for (const WCHAR *cur = buff; *cur != 0; )
+        {
+            while (*cur == L' ')
+                cur++;
 
-        value = buff + skip;
+            if (_wcsnicmp(cur, name, nameLen) == 0 && cur[nameLen] == L'=')
+            {
+                value = cur + nameLen + 1;
+                break;
+            }
+
+            const WCHAR *sep = wcschr(cur, L';');
+            if (sep == nullptr)
+                break;
+
+            cur = sep + 1;
+        }
+
+        if (value == nullptr)
+            return S_OK;
     }
 
     CComPtr<ICoreWebView2Cookie> cookie;
