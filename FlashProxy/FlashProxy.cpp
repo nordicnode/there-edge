@@ -1268,6 +1268,39 @@ void FlashProxyModule::GuessToolbarVisibility()
     if (m_identity != Identity::MessageBar)
         return;
 
+    // The message-bar y offset maps to the set of visible toolbars. Each entry has a Classic y and
+    // a SocialGame-theme y (+11) that share the same mask; a 0 mask means "hidden" (no toolbars).
+    struct YVisibility { LONG y; UINT32 mask; };
+    static const YVisibility table[] =
+    {
+        {   0, 0                                                                                                  },
+        {  24, (UINT32)Identity::MessageBar                                                                        },
+        { 112, (UINT32)Identity::MessageBar                                                                        },
+        {  48, (UINT32)Identity::ShortcutBar | (UINT32)Identity::MessageBar                                       },
+        { 136, (UINT32)Identity::ShortcutBar | (UINT32)Identity::MessageBar                                       },
+        {  58, (UINT32)Identity::FunFinder   | (UINT32)Identity::MessageBar                                       },
+        { 146, (UINT32)Identity::FunFinder   | (UINT32)Identity::MessageBar                                       },
+        {  46, (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar                                         },
+        { 134, (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar                                         },
+        {  82, (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder   | (UINT32)Identity::MessageBar        },
+        { 170, (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder   | (UINT32)Identity::MessageBar        },
+        {  70, (UINT32)Identity::ShortcutBar | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar        },
+        { 158, (UINT32)Identity::ShortcutBar | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar        },
+        {  80, (UINT32)Identity::FunFinder   | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar        },
+        { 168, (UINT32)Identity::FunFinder   | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar        },
+        { 104, (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar },
+        { 192, (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar },
+        {  88, 0 }, { 99, 0 },
+        { 123, (UINT32)Identity::MessageBar },
+        { 147, (UINT32)Identity::ShortcutBar | (UINT32)Identity::MessageBar },
+        { 157, (UINT32)Identity::FunFinder   | (UINT32)Identity::MessageBar },
+        { 145, (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar },
+        { 181, (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder   | (UINT32)Identity::MessageBar },
+        { 169, (UINT32)Identity::ShortcutBar | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar },
+        { 179, (UINT32)Identity::FunFinder   | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar },
+        { 203, (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar },
+    };
+
     RECT bounds;
     GetClientRect(m_clientWnd, &bounds);
 
@@ -1276,127 +1309,13 @@ void FlashProxyModule::GuessToolbarVisibility()
 
     if (m_ready)
     {
-        switch (y)
+        for (const YVisibility &entry : table)
         {
-            case 0:   // Hidden
+            if (entry.y == y)
             {
-                visibilityMask = 0;
+                visibilityMask = entry.mask;
                 break;
             }
-
-            case 24:  // MenuBar MessageBar
-            {
-                visibilityMask = (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 48:  // MenuBar ShortcutBar MessageBar
-            {
-                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 58:  // MenuBar FunFinder MessageBar
-            {
-                visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 46:  // MenuBar EmotionsBar MessageBar
-            {
-                visibilityMask = (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 82:  // MenuBar ShortcutBar FunFinder MessageBar
-            {
-                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 70:  // MenuBar ShortcutBar EmotionsBar MessageBar
-            {
-                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 80:  // MenuBar FunFinder EmotionsBar MessageBar
-            {
-                visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 104: // MenuBar ShortcutBar FunFinder EmotionsBar MessageBar
-            {
-                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 88:  // Hidden SocialGame
-            case 99:
-            {
-                visibilityMask = 0;
-                break;
-            }
-
-            case 112: // MenuBar SocialGame MessageBar
-            case 123:
-            {
-                visibilityMask = (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 136: // MenuBar ShortcutBar SocialGame MessageBar
-            case 147:
-            {
-                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 146: // MenuBar FunFinder SocialGame MessageBar
-            case 157:
-            {
-                visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 134: // MenuBar EmotionsBar SocialGame MessageBar
-            case 145:
-            {
-                visibilityMask = (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 170: // MenuBar ShortcutBar FunFinder SocialGame MessageBar
-            case 181:
-            {
-                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 158: // MenuBar ShortcutBar EmotionsBar SocialGame MessageBar
-            case 169:
-            {
-                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 168: // MenuBar FunFinder EmotionsBar SocialGame MessageBar
-            case 179:
-            {
-                visibilityMask = (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            case 192: // MenuBar ShortcutBar FunFinder EmotionsBar SocialGame MessageBar
-            case 203:
-            {
-                visibilityMask = (UINT32)Identity::ShortcutBar | (UINT32)Identity::FunFinder | (UINT32)Identity::EmotionsBar | (UINT32)Identity::MessageBar;
-                break;
-            }
-
-            default:
-                break;
         }
     }
 
