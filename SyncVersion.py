@@ -21,7 +21,8 @@ def get_version():
         if match is not None:
             path[-1] = match.group(1)            
             if '.'.join(path) == 'DeployProject.Deployable.Product.ProductVersion':
-                return match.group(2).split(':')[1]
+                value = match.group(2).split(':', 1)[1] if ':' in match.group(2) else match.group(2)
+                return value
             continue
         match = re.search(r'"([^"]+)"', line)
         if match is not None:
