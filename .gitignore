@@ -10,3 +10,6 @@ packages/
 /*.bat
 /Resources/changeme/iconspng/
 /WebView2/
+# Python bytecode
+__pycache__/
+*.py[cod]
