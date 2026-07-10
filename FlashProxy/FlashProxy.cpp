@@ -766,7 +766,15 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::put_Movie(BSTR pVal)
     if (!InternetCrackUrl(burl, 0, ICU_DECODE, &components))
         return E_FAIL;
 
-    if (_wcsicmp(scheme, L"http") != 0 || components.nPort < 1024)
+    // The proxy only intercepts the There local content server (a high, explicitly-ported
+    // http://127.0.0.1:<port> URL). InternetCrackUrl reports INTERNET_INVALID_PORT_NUMBER
+    // (65535) when the URL has no explicit port, which would otherwise pass a bare < 1024
+    // guard and leave m_port stuck at 65535 so the per-port resource filter never matches.
+    // Require an explicit non-privileged (>= 1024) port instead.
+    if (_wcsicmp(scheme, L"http") != 0)
+        return E_FAIL;
+
+    if (components.nPort == INTERNET_INVALID_PORT_NUMBER || components.nPort < 1024)
         return E_FAIL;
 
     m_port = components.nPort;
