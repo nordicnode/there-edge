@@ -663,7 +663,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID r
 
         case 2:
         {
-#if 1
             // Fake a window drag event to workaround the textbox focus issue.
             if (m_proxyWnd != nullptr)
             {
@@ -700,30 +699,6 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(DISPID dispIdMember, REFIID r
 
             if (m_controller != nullptr)
                 m_controller->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);
-#else
-            if (m_inplaceSite != nullptr)
-                m_inplaceSite->SetFocus(true);
-
-            CComBSTR bcommand = L"getKeyboardFocus";
-            CComBSTR bquery = L"";
-
-            VARIANTARG vargs[2];
-            vargs[0].vt = VT_BSTR;
-            vargs[0].bstrVal = bquery;
-            vargs[1].vt = VT_BSTR;
-            vargs[1].bstrVal = bcommand;
-
-            DISPPARAMS params;
-            params.rgvarg = vargs;
-            params.cArgs = _countof(vargs);
-            params.cNamedArgs = 0;
-
-            if (FAILED(InvokeFlashEvent(L"FSCommand", params)))
-                return E_FAIL;
-
-            if (m_controller != nullptr)
-                m_controller->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);
-#endif
 
             return S_OK;
         }
