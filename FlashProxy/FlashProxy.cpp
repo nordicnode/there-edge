@@ -904,6 +904,16 @@ HRESULT STDMETHODCALLTYPE FlashProxyModule::Invoke(HRESULT errorCode, ICoreWebVi
     m_controller->put_ShouldDetectMonitorScaleChanges(false);
     m_controller->put_RasterizationScale(1.0);
 
+    // ponytail: security ceiling — AddHostObjectToScript here exposes the *entire*
+    // FlashProxyModule IDispatch to the loaded page as window.chrome.webview.hostObjects.client.
+    // The page originates from http://127.0.0.1:<m_port> and its responses are proxied from
+    // There's own local content server (trusted origin). The page calls these methods by name
+    // (onBeginDragWindow/onKeyboardFocus via the DISPID mapping in GetIDsOfNames/Invoke).
+    // Upgrade path if the proxied content is ever attacker-influenceable: expose a minimal
+    // dedicated dispatch interface (one method per allowed JS-callable verb) instead of `this`,
+    // and gate AreHostObjectsAllowed to that origin. Kept as-is because the JS contract and the
+    // local-server origin are both under our control, and shrinking the surface needs IDL work
+    // that would change the hostObjects.client shape the pages already depend on.
     VARIANT hostObject = {};
     hostObject.vt = VT_DISPATCH;
     hostObject.pdispVal = static_cast<IDispatch*>(this);
