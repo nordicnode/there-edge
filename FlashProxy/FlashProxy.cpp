@@ -1512,7 +1512,7 @@ LRESULT APIENTRY FlashProxyModule::ChildWndProc(HWND hWnd, UINT Msg, WPARAM wPar
                 if (lParam != 0 && wParam > 0)
                 {
                     WCHAR *buff = (WCHAR*)lParam;
-                    if (wcscpy_s(buff, wParam / sizeof(WCHAR), flashProxy->m_aboutQuery) == 0)
+                    if (wcscpy_s(buff, (SIZE_T)wParam, flashProxy->m_aboutQuery) == 0)
                         length = (LONG)wcslen(buff);
                 }
                 else
