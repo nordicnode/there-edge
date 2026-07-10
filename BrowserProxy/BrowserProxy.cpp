@@ -199,6 +199,20 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::QueryInterface(REFIID riid, void *
         return S_OK;
     }
 
+    if (IsEqualIID(riid, IID_IClassFactory))
+    {
+        AddRef();
+        *object = static_cast<IClassFactory*>(this);
+        return S_OK;
+    }
+
+    if (IsEqualIID(riid, IID_IClassFactoryEx))
+    {
+        AddRef();
+        *object = static_cast<IClassFactoryEx*>(this);
+        return S_OK;
+    }
+
     if (IsEqualIID(riid, IID_IConnectionPointContainer))
     {
         AddRef();
