@@ -123,7 +123,6 @@ FlashProxyModule::FlashProxyModule():
     m_clientWnd(nullptr),
     m_maskRects(),
     m_maskRectCount(0),
-    m_encodeBuffer(),
     m_identity(Identity::Unknown),
     m_visibilityMask(0),
     m_port(9999),
@@ -1131,10 +1130,13 @@ HRESULT FlashProxyModule::OnNavigationCompleted(ICoreWebView2 *sender, ICoreWebV
 
 HRESULT FlashProxyModule::Encode(const BSTR in, CComBSTR &out)
 {
-    DWORD size = _countof(m_encodeBuffer);
-    if (SUCCEEDED(UrlEscape(in, m_encodeBuffer, &size, URL_ESCAPE_SEGMENT_ONLY | URL_ESCAPE_PERCENT)))
+    // Stack-local scratch: a URL segment never exceeds INTERNET_MAX_URL_LENGTH, so the old
+    // 10000-wchar per-instance member was pure waste (20 KB per control x N toolbar controls).
+    WCHAR buff[INTERNET_MAX_URL_LENGTH + 1];
+    DWORD size = _countof(buff);
+    if (SUCCEEDED(UrlEscape(in, buff, &size, URL_ESCAPE_SEGMENT_ONLY | URL_ESCAPE_PERCENT)))
     {
-        out = m_encodeBuffer;
+        out = buff;
         return S_OK;
     }
 

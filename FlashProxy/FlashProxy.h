@@ -237,7 +237,6 @@ protected:
     HWND                                     m_clientWnd;
     RECT                                     m_maskRects[10];
     LONG                                     m_maskRectCount;
-    WCHAR                                    m_encodeBuffer[10000];
     Identity                                 m_identity;
     UINT32                                   m_visibilityMask;
     INTERNET_PORT                            m_port;
