@@ -1210,6 +1210,8 @@ HRESULT BrowserProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWeb
         if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
             return E_FAIL;
 
+        // Message shape is "command/path?query". Split '?' first so the '/' search below is
+        // confined to the command portion and never strays into the query string.
         WCHAR *query = wcschr(command, L'?');
         if (query != nullptr)
         {

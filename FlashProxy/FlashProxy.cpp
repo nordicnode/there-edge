@@ -946,6 +946,7 @@ HRESULT FlashProxyModule::OnWebMessageReceived(ICoreWebView2 *sender, ICoreWebVi
         if (FAILED(args->TryGetWebMessageAsString(&command)) || command == nullptr)
             return E_FAIL;
 
+        // Message shape is "command?args". Split '?' then use bquery directly.
         WCHAR *query = wcschr(command, L'?');
         if (query != nullptr)
         {
