@@ -61,6 +61,12 @@ void ReportError(HWND wnd, const WCHAR *format, ...)
     MessageBox(wnd, buff, L"ThereEdge Error", MB_OK | MB_ICONERROR);
 }
 
+BOOL IsDevToolsEnabled()
+{
+    WCHAR value[100];
+    return (GetEnvironmentVariable(L"THEREEDGE_DEVELOPER_TOOLS", value, _countof(value)) > 0 && wcscmp(value, L"1") == 0);
+}
+
 extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 {
     g_Instance = hInstance;
@@ -764,7 +770,7 @@ HRESULT STDMETHODCALLTYPE BrowserProxyModule::Invoke(HRESULT errorCode, ICoreWeb
     if (FAILED(m_view->get_Settings(&settings)) || settings == nullptr)
         return E_FAIL;
 
-    settings->put_AreDevToolsEnabled(true);
+    settings->put_AreDevToolsEnabled(IsDevToolsEnabled());
     settings->put_AreDefaultContextMenusEnabled(true);
     settings->put_AreDefaultScriptDialogsEnabled(true);
     settings->put_IsBuiltInErrorPageEnabled(true);

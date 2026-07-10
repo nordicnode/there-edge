@@ -4,6 +4,7 @@ using namespace ATL;
 using namespace Microsoft::WRL;
 
 void Log(const WCHAR *format, ...);
+BOOL IsDevToolsEnabled();
 
 // ponytail: private internal interface, not in the IDL/typelib — exists only so a parent
 // BrowserProxyModule can hand the new-window deferral to a child instance it created via
