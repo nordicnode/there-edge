@@ -143,7 +143,7 @@ HRESULT STDMETHODCALLTYPE FlashRequestProxy::OnProgress(ULONG ulProgress, ULONG 
 
 HRESULT STDMETHODCALLTYPE FlashRequestProxy::OnStopBinding(HRESULT hresult, LPCWSTR szError)
 {
-    if (FAILED(hresult) || m_deferral != nullptr)
+    if (FAILED(hresult) && m_deferral != nullptr)
     {
         if (m_environment == nullptr || m_args == nullptr)
             return E_FAIL;
