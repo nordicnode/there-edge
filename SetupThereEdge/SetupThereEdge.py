@@ -49,7 +49,7 @@ if __name__ == '__main__':
                 [2, UUID('8856F961-340A-11D0-A96B-00C04FD705A2'), UUID('4D5AA1D8-B2D9-49D0-860E-8DAF2EC2CF0C')],  # WebBrowser CLSID
             ]
             with open(os.path.join(args.path, 'There.exe'), 'rb') as file:
-                data = file.read()
+                data = bytearray(file.read())
             for uuid_pair in uuid_pairs:
                 if data.find(uuid_pair[2].bytes_le) >= 0:
                     raise RuntimeError('The patch has already been applied.')
@@ -60,8 +60,8 @@ if __name__ == '__main__':
                     if f < 0:
                         raise RuntimeError('The patch cannot be used with this version of There.')
                     index += f
-                    data = data[:index] + uuid_pair[2].bytes_le + data[index + 16:]
-                    index += 1
+                    data[index:index + 16] = uuid_pair[2].bytes_le
+                    index += 16
                 if data[index:].find(uuid_pair[1].bytes_le) >= 0:
                     raise RuntimeError('The patch cannot be used with this version of There.')
             with open(os.path.join(args.path, 'ThereEdge.exe'), 'wb') as file:
